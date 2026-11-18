@@ -1,0 +1,4 @@
+reason,action,utterances,hours
+duplicate_text,flagged,2,0.003
+manual_review,removed,1,0.001
+manual_review_kept,flagged,9,0.012
