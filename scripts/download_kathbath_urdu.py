@@ -9,12 +9,16 @@ Speakers with less data than the cap keep all their utterances; speakers with
 more are sampled down with a fixed seed. This keeps all speakers and stops a
 few speakers with many hours from dominating the data.
 
+The dataset stores audio as 24-bit FLAC. We save it as 16-bit FLAC (same 16 kHz
+sample rate, no other change), which halves the size so the data fits in the repo.
+
 Output:
-  data/raw/audio/<speaker_id>/<utt_id>.flac   audio as stored in the dataset (16 kHz)
+  data/raw/audio/<speaker_id>/<utt_id>.flac   16 kHz, 16-bit FLAC
   data/raw/metadata.csv                        utt_id,path,speaker_id,gender,duration,text,source_split
 
 Usage (repo root, venv active, logged in to Hugging Face):
   python scripts/download_kathbath_urdu.py --target-hours 25 --seed 42
+  python scripts/download_kathbath_urdu.py --reencode-existing   # convert files already downloaded
 """
 
 import argparse
@@ -88,6 +92,25 @@ def select_subset(meta, target_hours, seed):
     return subset, cap_h
 
 
+def save_flac16(audio, sr, target):
+    """Write mono audio as 16-bit FLAC at its original sample rate."""
+    sf.write(target, audio, sr, format="FLAC", subtype="PCM_16")
+
+
+def reencode_existing():
+    meta = pd.read_csv(RAW_DIR / "metadata.csv", encoding="utf-8")
+    done = 0
+    for path in meta["path"]:
+        if sf.info(path).subtype == "PCM_16":
+            continue
+        audio, sr = sf.read(path, dtype="float32")
+        save_flac16(audio, sr, path)
+        done += 1
+        if done % 2000 == 0:
+            print(f"  re-encoded {done}")
+    print(f"Re-encoded {done} files to 16-bit FLAC ({len(meta) - done} were already 16-bit).")
+
+
 def write_audio(fs, subset):
     wanted = set(subset["fname"])
     out_paths = {}
@@ -102,12 +125,8 @@ def write_audio(fs, subset):
                     utt_id = row["fname"].rsplit(".", 1)[0]
                     target = RAW_DIR / "audio" / str(row["speaker_id"]) / f"{utt_id}.flac"
                     target.parent.mkdir(parents=True, exist_ok=True)
-                    data = row[AUDIO_COLUMN]["bytes"]
-                    if data[:4] == b"fLaC":
-                        target.write_bytes(data)
-                    else:  # not FLAC: decode and re-encode, keeping the sample rate
-                        audio, sr = sf.read(io.BytesIO(data))
-                        sf.write(target, audio, sr, format="FLAC")
+                    audio, sr = sf.read(io.BytesIO(row[AUDIO_COLUMN]["bytes"]), dtype="float32")
+                    save_flac16(audio, sr, target)
                     out_paths[row["fname"]] = target.as_posix()
         print(f"  done {path}: {len(out_paths)} files so far")
     return out_paths
@@ -117,7 +136,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--target-hours", type=float, default=25.0)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--reencode-existing", action="store_true",
+                        help="only convert already downloaded files to 16-bit FLAC")
     args = parser.parse_args()
+    if args.reencode_existing:
+        reencode_existing()
+        return
 
     fs = HfFileSystem()
     files = urdu_parquet_files()
