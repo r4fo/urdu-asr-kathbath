@@ -1,0 +1,14 @@
+# Python caches
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Virtual environments and secrets
+.venv/
+venv/
+.env
+
+# Training outputs that are too large for git (upload weights to the Hugging Face Hub instead)
+checkpoints/
+wandb/
+runs/

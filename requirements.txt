@@ -1,0 +1,14 @@
+# Pinned versions. If you install a different version, update this file.
+torch==2.4.1
+torchaudio==2.4.1
+transformers==4.46.3
+datasets==3.1.0
+accelerate==1.1.1
+huggingface_hub==0.26.2
+evaluate==0.4.3
+jiwer==3.0.5
+soundfile==0.12.1
+librosa==0.10.2.post1
+numpy==1.26.4
+pandas==2.2.3
+pytest==8.3.3
