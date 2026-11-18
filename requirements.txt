@@ -3,6 +3,7 @@ torch==2.4.1
 torchaudio==2.4.1
 transformers==4.46.3
 datasets==3.1.0
+pyarrow==17.0.0
 accelerate==1.1.1
 huggingface_hub==0.26.2
 evaluate==0.4.3
