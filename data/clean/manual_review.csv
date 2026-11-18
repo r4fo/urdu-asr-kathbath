@@ -1,0 +1,11 @@
+utt_id,selected_because,observation,decision
+844424930860251-622-m,lowest speech ratio (3%),quiet with very light microphone hiss; speech clear,keep
+844424930857826-622-m,low speech ratio,end of the clip freezes or cuts off,remove
+844424931384900-63-m,fastest speech rate,clear but fast speaker,keep
+844424931371253-935-f,fast speech rate,clear but fast speaker,keep
+844424930629900-216-f,median clip used as reference,loud and clear,keep
+844424930860246-622-m,low speech ratio and long trailing silence,quiet and somewhat unclear; no noise,keep
+844424930857762-622-m,low speech ratio and long trailing silence,quiet and somewhat unclear; no noise,keep
+844424930860301-622-m,low speech ratio and long trailing silence,quiet but clear,keep
+844424930857729-622-m,low speech ratio and long trailing silence,clear,keep
+844424930825796-622-m,low speech ratio and long trailing silence,possibly cut at the end (reviewer unsure); fast speaker,keep (recheck with Whisper)

@@ -27,6 +27,9 @@ import soundfile as sf
 
 RAW_META = Path("data/raw/metadata.csv")
 CLEAN_DIR = Path("data/clean")
+# Clips we listened to, with the decision for each (see the README, Cleaning section).
+# The reviewer does not speak Urdu: decisions are about audio quality and cut-offs only.
+MANUAL_REVIEW = CLEAN_DIR / "manual_review.csv"
 
 # Arabic-script letter variants that should be written with the Urdu form.
 LETTER_FIXES = {
@@ -91,6 +94,8 @@ def main():
     args = p.parse_args()
 
     meta = pd.read_csv(RAW_META, encoding="utf-8")
+    review = (pd.read_csv(MANUAL_REVIEW, encoding="utf-8").set_index("utt_id")
+              if MANUAL_REVIEW.exists() else pd.DataFrame(columns=["observation", "decision"]))
     log, keep_rows, seen_hashes = [], [], {}
 
     def record(utt, action, reason, detail=""):
@@ -98,6 +103,12 @@ def main():
 
     for i, row in enumerate(meta.itertuples(index=False), 1):
         utt, path = row.utt_id, Path(row.path)
+        if utt in review.index:
+            decision, note = str(review.at[utt, "decision"]), str(review.at[utt, "observation"])
+            if decision.startswith("remove"):
+                record(utt, "removed", "manual_review", note)
+                continue
+            record(utt, "flagged", "manual_review_kept", note)
         try:
             data = path.read_bytes()
             audio, sr = sf.read(path, dtype="float32", always_2d=False)
