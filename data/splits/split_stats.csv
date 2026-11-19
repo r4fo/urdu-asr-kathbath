@@ -1,0 +1,4 @@
+split,speakers,speakers_Female,speakers_Male,utterances,hours,pct_hours
+train,32,14,18,11868,17.641,70.6
+dev,6,3,3,1956,2.717,10.9
+test,9,4,5,3031,4.621,18.5
