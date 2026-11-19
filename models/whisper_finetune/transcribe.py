@@ -5,8 +5,10 @@ for our fine-tuned checkpoints (a local folder).
 
 Writes:
   --out                      prediction CSV: utt_id,hyp  (raw model output, not normalized)
-  results/timing.csv         one appended row: system,model,revision,num_beams,batch_size,
-                             hardware,audio_seconds,decode_seconds,rtf
+  results/timing/<system>.csv  one row: system,model,revision,num_beams,batch_size,
+                               hardware,audio_seconds,decode_seconds,rtf
+                               (one file per system, so branches never conflict;
+                               Member 2 combines them)
 
 RTF = model decoding time / audio duration. Decoding time is measured around
 model.generate() with torch.cuda.synchronize(), after one warm-up batch, and
@@ -29,7 +31,7 @@ import soundfile as sf
 import torch
 from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
-TIMING_CSV = Path("results/timing.csv")
+TIMING_DIR = Path("results/timing")
 TIMING_FIELDS = ["system", "model", "revision", "num_beams", "batch_size",
                  "hardware", "audio_seconds", "decode_seconds", "rtf"]
 
@@ -108,12 +110,10 @@ def main():
     pd.DataFrame(sorted(hyps.items()), columns=["utt_id", "hyp"]).to_csv(
         out, index=False, encoding="utf-8")
 
-    TIMING_CSV.parent.mkdir(parents=True, exist_ok=True)
-    new = not TIMING_CSV.exists()
-    with TIMING_CSV.open("a", newline="", encoding="utf-8") as fh:
+    TIMING_DIR.mkdir(parents=True, exist_ok=True)
+    with (TIMING_DIR / f"{args.system}.csv").open("w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=TIMING_FIELDS)
-        if new:
-            w.writeheader()
+        w.writeheader()
         w.writerow({"system": args.system, "model": args.model, "revision": revision,
                     "num_beams": args.num_beams, "batch_size": args.batch_size,
                     "hardware": hardware, "audio_seconds": round(audio_sec, 2),
