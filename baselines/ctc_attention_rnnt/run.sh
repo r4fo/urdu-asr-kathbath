@@ -22,7 +22,8 @@
 #   dev:  work/<name>/predictions_dev/<system>.csv   (for tuning, not committed)
 #   test: results/predictions/<system>.csv           (only with --test and --name full;
 #                                                    other names write work/<name>/predictions_test/)
-#   work/<name>/timing_<system>.txt                  (hardware, training and decoding time)
+#   results/timing/<system>.csv                      (test decoding RTF, team format; with --test and --name full)
+#   work/<name>/timing_<system>.txt                  (notes: hardware, training and decoding time)
 set -euo pipefail
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -77,6 +78,10 @@ if [ "${system}" = rnnt ] && ! python3 -c "import warprnnt_pytorch" 2>/dev/null;
     export PYTHONPATH="${HERE}/rnnt_loss${PYTHONPATH:+:${PYTHONPATH}}"
 fi
 
+# ESPnet saves training plots with matplotlib. Colab sets MPLBACKEND to its notebook
+# backend, which ESPnet's environment does not have, so use the file-only backend.
+export MPLBACKEND=Agg
+
 gpu_inference=true
 [ "${ngpu}" -eq 0 ] && gpu_inference=false
 
@@ -93,7 +98,7 @@ asr() {  # asr <first stage> <last stage>
             --lang ur --fs 16k --audio_format flac --feats_type raw \
             --token_type char \
             --use_lm false \
-            --ngpu "${ngpu}" --nj 4 --inference_nj 2 --gpu_inference "${gpu_inference}" \
+            --ngpu "${ngpu}" --nj 4 --inference_nj 1 --gpu_inference "${gpu_inference}" \
             --max_wav_duration 30 \
             --dumpdir "${work}/dump" --expdir "${expdir}" \
             --train_set train --valid_set dev --test_sets "${test_sets}" \
@@ -145,7 +150,15 @@ for dset in ${test_sets}; do
     python3 "${HERE}/to_predictions.py" --espnet-text "${hyp}" --split "${splits_dir}/${dset}.csv" --out "${out}"
 done
 
-# 5. Hardware and time, for results/timing.csv (ESPnet measures the decoding RTF itself).
+# 5. Timing. The test RTF goes to results/timing/<system>.csv in the team format
+#    (one job, so per-utterance times are not slowed by a second job on the GPU).
+#    Training time and dev RTF go to a notes file for the README.
+if ${do_test} && [ "${name}" = full ]; then
+    python3 "${HERE}/make_timing.py" --system "${system}" \
+        --rtf-log "$(decode_dir test)/logdir/calculate_rtf.log" \
+        --decode-config "${HERE}/conf/decode_${system}.yaml" \
+        --out "${REPO_ROOT}/results/timing/${system}.csv"
+fi
 {
     echo "== ${system} $(date '+%Y-%m-%d %H:%M') stages ${stage}-${stop_stage}, wall time $(( end - start )) s"
     echo "gpu: $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || echo none)"

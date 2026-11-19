@@ -1,6 +1,6 @@
 # CTC, hybrid CTC/attention and RNN-T baselines (Member 4)
 
-Three small end-to-end models trained by us with one toolkit, **ESPnet 202412** (git tag `v.202412`),
+Three small end-to-end models trained by us with one toolkit, **ESPnet 202511** (git tag `v.202511`),
 on the shared train split, with character tokens. They exist to compare the three model families
 on the same data; they are small and trained for a few hours each, so strong numbers are not the goal.
 
@@ -35,10 +35,11 @@ It is the same standard RNN-T loss. `run.sh` uses it only if warp-transducer is 
 
 | File | What it does |
 | --- | --- |
-| `setup_espnet.sh` | Installs ESPnet 202412 and torch 2.4.1, and clones the ESPnet recipe scripts |
+| `setup_espnet.sh` | Clones the ESPnet 202511 recipe scripts and installs ESPnet and torch 2.4.1 in its own Python 3.12 environment (made with uv), because Colab's Python 3.13 has no wheels for them |
 | `prepare_data.py` | Split CSVs → ESPnet data folders (`wav.scp`, `text`, `utt2spk`, `spk2utt`); stops if a speaker is in two splits |
 | `run.sh` | Runs ESPnet `asr.sh` stages 2-12 for one system and writes the prediction CSV and timing notes |
 | `to_predictions.py` | ESPnet output → `utt_id,hyp` CSV (raw output, not normalized) |
+| `make_timing.py` | ESPnet's test RTF log → `results/timing/<system>.csv` (team timing format) |
 | `make_sample_splits.py` | 40/10/10-clip speaker-disjoint sample from `data/clean/` for testing the pipeline |
 | `colab.ipynb` | The same steps on Google Colab, with checkpoints on Google Drive |
 | `conf/` | Training and decoding configs |
@@ -63,5 +64,8 @@ Repeat with `hybrid` and `rnnt`. Training resumes from the last checkpoint when 
 
 ## Hardware and results
 
-TODO after training: GPU, training time per system, decoding RTF (from `work/full/timing_<system>.txt`),
+Test decoding speed is written to `results/timing/<system>.csv` by `make_timing.py`, from ESPnet's own
+per-utterance timing (one decoding job, batch size 1, model loading not counted).
+
+TODO after training: GPU, training time per system (from `work/full/timing_<system>.txt`),
 and dev/test WER and CER from `results/results.csv` (computed by `src/evaluate.py`, not by ESPnet).
