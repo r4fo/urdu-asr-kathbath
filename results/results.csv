@@ -1,0 +1,4 @@
+system,split,n_utts,wer,cer,wer_ci_low,wer_ci_high
+whisper_small_ft_dev_beam1,dev,1956,0.179371,0.054428,0.172827,0.186249
+whisper_small_ft_dev_beam5,dev,1956,0.173638,0.052071,0.166963,0.180651
+whisper_small_zeroshot,dev,1956,0.358474,0.121828,0.347738,0.370264

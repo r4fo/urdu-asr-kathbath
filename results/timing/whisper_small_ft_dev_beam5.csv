@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+whisper_small_ft_dev_beam5,checkpoints/whisper_small_ft/best,local,5,16,NVIDIA GeForce RTX 4060,9781.29,510.78,0.05222
