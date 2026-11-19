@@ -14,7 +14,7 @@ Pipeline test on 50 clips (no split needed):
       --max-steps 20 --eval-steps 10 --output-dir checkpoints/whisper_test
 
 Full run (after the split is frozen):
-  python models/whisper_finetune/train.py --epochs 2 --output-dir checkpoints/whisper_small_ft
+  python models/whisper_finetune/train.py --epochs 4 --output-dir checkpoints/whisper_small_ft
 Resume after an interruption: add --resume
 """
 
@@ -109,6 +109,7 @@ def main():
     model.generation_config.language = "urdu"
     model.generation_config.task = "transcribe"
     model.generation_config.forced_decoder_ids = None
+    model.config.forced_decoder_ids = None  # language and task are set above instead
     model.config.use_cache = False  # required with gradient checkpointing
 
     train_ds = SpeechDataset(args.train_manifest, processor, args.train_limit)
@@ -153,7 +154,7 @@ def main():
     trainer = Seq2SeqTrainer(
         model=model, args=training_args, train_dataset=train_ds, eval_dataset=dev_ds,
         data_collator=Collator(processor, model.config.decoder_start_token_id),
-        compute_metrics=compute_metrics, tokenizer=processor.feature_extractor)
+        compute_metrics=compute_metrics, processing_class=processor.feature_extractor)
 
     trainer.train(resume_from_checkpoint=True if args.resume else None)
     best = f"{args.output_dir}/best"
