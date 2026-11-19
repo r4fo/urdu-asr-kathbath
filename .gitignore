@@ -12,3 +12,6 @@ venv/
 checkpoints/
 wandb/
 runs/
+
+# KenLM source and build (built by models/wav2vec2_finetune/build_lm.sh)
+kenlm/
