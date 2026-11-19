@@ -1,0 +1,84 @@
+# System 2: hybrid CTC/attention encoder-decoder (loss = 0.3 CTC + 0.7 attention).
+# Shared settings: the same small Conformer encoder (4.6M parameters), features,
+# SpecAugment, optimizer and schedule for all three systems, so only the
+# decoder / loss differs. Sized for a few hours on one 8-16 GB GPU (T4 or RTX).
+seed: 42
+num_workers: 4
+batch_type: numel
+batch_bins: 4000000          # about 250 s of audio per batch
+accum_grad: 1
+max_epoch: 20
+patience: none
+init: none
+best_model_criterion:        # best epoch = lowest dev (valid) loss
+-   - valid
+    - loss
+    - min
+keep_nbest_models: 3
+use_amp: true
+num_att_plot: 0
+
+frontend: default
+frontend_conf:               # 80-dim log-mel, 25 ms window, 10 ms hop
+    n_fft: 512
+    win_length: 400
+    hop_length: 160
+    n_mels: 80
+
+encoder: conformer
+encoder_conf:
+    output_size: 144
+    attention_heads: 4
+    linear_units: 576
+    num_blocks: 8
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: conv2d
+    normalize_before: true
+    macaron_style: true
+    rel_pos_type: latest
+    pos_enc_layer_type: rel_pos
+    selfattention_layer_type: rel_selfattn
+    activation_type: swish
+    use_cnn_module: true
+    cnn_module_kernel: 15
+
+optim: adam
+optim_conf:
+    lr: 0.002
+    weight_decay: 0.000001
+scheduler: warmuplr
+scheduler_conf:
+    warmup_steps: 2000
+
+specaug: specaug
+specaug_conf:
+    apply_time_warp: true
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 27
+    num_freq_mask: 2
+    apply_time_mask: true
+    time_mask_width_ratio_range:
+    - 0.
+    - 0.05
+    num_time_mask: 5
+
+decoder: transformer
+decoder_conf:
+    attention_heads: 4
+    linear_units: 1024
+    num_blocks: 4
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    self_attention_dropout_rate: 0.1
+    src_attention_dropout_rate: 0.1
+
+model_conf:
+    ctc_weight: 0.3
+    lsm_weight: 0.1
+    length_normalized_loss: false

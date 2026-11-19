@@ -1,0 +1,4 @@
+# CTC only: greedy search (beam 1), no language model.
+beam_size: 1
+ctc_weight: 1.0
+lm_weight: 0.0

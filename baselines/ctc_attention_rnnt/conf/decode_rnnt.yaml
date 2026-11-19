@@ -1,0 +1,6 @@
+# Transducer beam search, no language model.
+beam_size: 10
+lm_weight: 0.0
+transducer_conf:
+    search_type: default
+    score_norm: true
