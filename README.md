@@ -15,7 +15,7 @@ with the same text normalization and the same scoring (WER and CER).
 | Member | Role | GitHub |
 | --- | --- | --- |
 | TODO | Data, Whisper fine-tuning, repository | TODO |
-| TODO | Splits and evaluation | TODO |
+| Muhammed Isa Loonat | Splits and evaluation | [isaloonat](https://github.com/isaloonat) |
 | TODO | GMM-HMM baseline | TODO |
 | TODO | CTC, attention, RNN-T baselines | TODO |
 | TODO | Pretrained checkpoints, metrics, presentation | TODO |
@@ -54,26 +54,57 @@ logged with its reason in `data/clean/cleaning_log.csv`.
 
 ## 5. Splits
 
-- **Test:** the official Kathbath **Test-Unknown** split. Its speakers do not appear in train or dev.
-  We do **not** use Test-Known, because its speakers also appear in training data.
-- **Train / dev:** made by `scripts/split.py`, grouped by speaker ID, seed `TODO`.
-  All utterances of one speaker go to the same split.
+The Hugging Face version of Kathbath has no Test-Unknown split, and every valid speaker is also a train
+speaker. So `scripts/split.py` splits all 47 speakers ourselves, **by speaker** (seed `42`): every
+utterance of a speaker goes to the same split, and no speaker is in two splits.
 
-| Split | Speakers | Utterances | Hours |
+- Test: 9 speakers (4 F / 5 M), dev: 6 speakers (3 F / 3 M), the rest train. Genders are divided in
+  proportion to the speaker counts (21 F / 26 M).
+- Speakers with fewer than 50 clips (9 speakers, 1 to 37 clips) always go to train. In test they would
+  add a speaker but almost no audio.
+- Speakers are drawn at random with seed 42; the first draw where test has 17-19% and dev 10-12% of the
+  hours is kept (draw 586). This stops a lucky draw of very large or very small speakers from skewing the sizes.
+
+| Split | Speakers (F / M) | Utterances | Hours |
 | --- | --- | --- | --- |
-| Train | TODO | TODO | TODO |
-| Dev | TODO | TODO | TODO |
-| Test | TODO | TODO | TODO |
+| Train | 32 (14 / 18) | 11,868 | 17.64 (70.6%) |
+| Dev | 6 (3 / 3) | 1,956 | 2.72 (10.9%) |
+| Test | 9 (4 / 5) | 3,031 | 4.62 (18.5%) |
 
-Test sentences that appear word for word in train: TODO.
+Test speakers: 15, 216, 295, 330, 617, 835, 842, 1064, 1094. Dev speakers: 264, 318, 485, 627, 841, 1049.
+Counts are in `data/splits/split_stats.csv`.
+
+Test sentences that also appear in train (after normalization): **1 of 3,031**, the one sentence read twice
+in the data (speaker 68 in train, speaker 842 in test, flagged in `data/clean/cleaning_log.csv`). It is listed in
+`data/splits/test_overlap.csv`. For systems with a language model we also report WER without it.
 
 Dev is used to choose settings and checkpoints. Test is used once, at the end, after all settings are frozen.
 
 ## 6. Metrics
 
 TODO: why WER and CER fit Urdu ASR, with the Hugging Face audio course, chapter 5
-(https://huggingface.co/learn/audio-course/en/chapter5/evaluation), and our normalization policy
-(`src/normalize.py`).
+(https://huggingface.co/learn/audio-course/en/chapter5/evaluation).
+
+**Normalization policy (fixed on 19 November 2026, before any test results; not changed after).**
+`src/evaluate.py` applies `src/normalize.py` to references and predictions in exactly the same way.
+Nobody normalizes their own predictions. In order:
+
+1. Numbers written with digits become Urdu words, as the references write them (`src/urdu_numbers.py`):
+   "2015" → "دو ہزار پندرہ", "10,000" → "دس ہزار". The references contain no digits, so this only changes
+   predictions, the same way for every system.
+2. Unicode NFC; invisible characters (zero-width, direction marks) and tatweel removed.
+3. Letter variants unified to the forms the references use: ك → ک, ي / ى → ی, ه → ہ,
+   آ / أ / إ → ا, ؤ → و, ۂ / ۀ → ہ, ۓ → ے. ئ, ء, ے and ھ are kept.
+4. Diacritics removed (U+064B to U+0655, U+0670).
+5. Punctuation (۔ ، ؟ ؛ and others) becomes a space; spaces are collapsed.
+
+WER and CER are corpus-level (total errors / total reference words or characters; CER counts spaces).
+The 95% confidence interval on WER comes from 1,000 bootstrap resamples of test utterances (seed 42).
+
+The main results table uses this full normalization for every system. A small extra table shows how much
+normalization matters, for zero-shot Whisper-small, Whisper-large-v3 and our fine-tuned model:
+(1) no normalization (`--no-normalize`), (2) letters and punctuation only (`--no-digits`),
+(3) full normalization (the main results).
 
 ## 7. Baselines
 
