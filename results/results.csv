@@ -2,3 +2,10 @@ system,split,n_utts,wer,cer,wer_ci_low,wer_ci_high
 whisper_small_ft_dev_beam1,dev,1956,0.179371,0.054428,0.172827,0.186249
 whisper_small_ft_dev_beam5,dev,1956,0.173638,0.052071,0.166963,0.180651
 whisper_small_zeroshot,dev,1956,0.358474,0.121828,0.347738,0.370264
+whisper_small_zeroshot,test,3031,0.426594,0.157997,0.409721,0.446417
+whisper_small_ft_beam5,test,3031,0.197404,0.060142,0.191917,0.203254
+whisper_small_ft_beam1,test,3031,0.203909,0.06175,0.197957,0.209817
+whisper_small_zeroshot,test_nonorm,3031,0.432149,0.161202,0.415536,0.452149
+whisper_small_ft_beam5,test_nonorm,3031,0.197404,0.060142,0.191917,0.203254
+whisper_small_zeroshot,test_nodigits,3031,0.428049,0.159218,0.411166,0.448065
+whisper_small_ft_beam5,test_nodigits,3031,0.197404,0.060142,0.191917,0.203254
