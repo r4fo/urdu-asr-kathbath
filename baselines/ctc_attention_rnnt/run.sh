@@ -19,7 +19,7 @@
 # Environment: ESPNET_ROOT (default $HOME/espnet), set up by setup_espnet.sh.
 #
 # Output:
-#   dev:  work/<name>/predictions_dev/<system>.csv   (for tuning, not committed)
+#   dev:  results/predictions/<system>_dev.csv       (--name full; other names: work/<name>/predictions_dev/)
 #   test: results/predictions/<system>.csv           (only with --test and --name full;
 #                                                    other names write work/<name>/predictions_test/)
 #   results/timing/<system>.csv                      (test decoding RTF, team format; with --test and --name full)
@@ -141,9 +141,12 @@ decode_dir() { if [ "$1" = dev ]; then echo "${asr_exp}/decode_${system}/org/dev
 for dset in ${test_sets}; do
     hyp=$(decode_dir "${dset}")/text
     [ -f "${hyp}" ] || continue
-    # Only the real run (--name full) writes into results/predictions/.
-    if [ "${dset}" = test ] && [ "${name}" = full ]; then
+    # Only the real run (--name full) writes into results/predictions/
+    # (test: <system>.csv, dev: <system>_dev.csv, as the other systems do).
+    if [ "${name}" = full ] && [ "${dset}" = test ]; then
         out=${REPO_ROOT}/results/predictions/${system}.csv
+    elif [ "${name}" = full ]; then
+        out=${REPO_ROOT}/results/predictions/${system}_${dset}.csv
     else
         out=${work}/predictions_${dset}/${system}.csv
     fi

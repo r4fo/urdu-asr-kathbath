@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+rnnt,"ESPnet 202511 rnnt (trained by us, conf/train_rnnt.yaml)",17d92a46,10,1,Tesla T4,16635.62,5073.8,0.305

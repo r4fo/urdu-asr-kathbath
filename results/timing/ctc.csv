@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+ctc,"ESPnet 202511 ctc (trained by us, conf/train_ctc.yaml)",17d92a46,1,1,Tesla T4,16635.62,3996.65,0.2402

@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+hybrid,"ESPnet 202511 hybrid (trained by us, conf/train_hybrid.yaml)",17d92a46,10,1,Tesla T4,16635.62,6718.63,0.4039

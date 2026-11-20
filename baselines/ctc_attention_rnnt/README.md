@@ -4,11 +4,11 @@ Three small end-to-end models trained by us with one toolkit, **ESPnet 202511** 
 on the shared train split, with character tokens. They exist to compare the three model families
 on the same data; they are small and trained for a few hours each, so strong numbers are not the goal.
 
-| System | Prediction file | Training loss | Decoding |
-| --- | --- | --- | --- |
-| CTC | `results/predictions/ctc.csv` | CTC only | greedy (beam 1) |
-| Hybrid CTC/attention | `results/predictions/hybrid.csv` | 0.3 CTC + 0.7 attention | joint CTC/attention beam search, beam 10 |
-| RNN-T | `results/predictions/rnnt.csv` | RNN-T + 0.3 auxiliary CTC | transducer beam search, beam 10 |
+| System | Test predictions | Dev predictions | Training loss | Decoding | Epochs |
+| --- | --- | --- | --- | --- | --- |
+| CTC | `results/predictions/ctc.csv` | `results/predictions/ctc_dev.csv` | CTC only | greedy (beam 1) | 20 |
+| Hybrid CTC/attention | `results/predictions/hybrid.csv` | `results/predictions/hybrid_dev.csv` | 0.3 CTC + 0.7 attention | joint CTC/attention beam search, beam 10 | 20 |
+| RNN-T | `results/predictions/rnnt.csv` | `results/predictions/rnnt_dev.csv` | RNN-T + 0.3 auxiliary CTC | transducer beam search, beam 10 | 20 (resumed once, see below) |
 
 No language model is used by any of the three.
 
@@ -62,10 +62,37 @@ bash baselines/ctc_attention_rnnt/run.sh ctc --stage 12 --test   # once, after s
 
 Repeat with `hybrid` and `rnnt`. Training resumes from the last checkpoint when `run.sh` is run again with `--stage 11`.
 
+## RNN-T training was interrupted once
+
+RNN-T training stopped at epoch 10 when Colab's GPU usage limit was reached. It was resumed from the
+last checkpoint on Google Drive with ESPnet `asr.sh` stage 11 and trained to the same 20 epochs as CTC and
+hybrid:
+
+```
+bash baselines/ctc_attention_rnnt/run.sh rnnt --expdir <drive>/exp --stage 11 --asr-args "--max_epoch 20"
+```
+
+ESPnet's resume restores the model, the optimizer and the learning-rate scheduler, so the run follows the
+same 20-epoch schedule as an uninterrupted one. Only the predictions of the final 20-epoch model are
+reported. Test was also decoded once with the 10-epoch model before the retrain; those predictions were
+overwritten and never scored, so no setting was chosen by looking at test.
+
 ## Hardware and results
 
-Test decoding speed is written to `results/timing/<system>.csv` by `make_timing.py`, from ESPnet's own
-per-utterance timing (one decoding job, batch size 1, model loading not counted).
+All training and decoding ran on Google Colab with one NVIDIA Tesla T4 (15 GB) and an Intel Xeon CPU @ 2.00GHz.
 
-TODO after training: GPU, training time per system (from `work/full/timing_<system>.txt`),
-and dev/test WER and CER from `results/results.csv` (computed by `src/evaluate.py`, not by ESPnet).
+| System | Training time | Dev decoding | Dev RTF | Test decoding | Test RTF |
+| --- | --- | --- | --- | --- | --- |
+| CTC (greedy) | 2696 s | 2343 s | 0.240 | 3997 s | 0.240 |
+| Hybrid (beam 10) | 3183 s | 4147 s | 0.424 | 6719 s | 0.404 |
+| RNN-T (beam 10) | 1220 s + 1663 s for the two resumed parts (see above) | 3080 s | 0.315 | 5074 s | 0.305 |
+
+Decoding time and RTF come from ESPnet's own per-utterance timing (`calculate_rtf.log`: sum of the
+decoding time of each clip, one job, batch size 1, model loading not counted), over 1956 dev clips and
+3031 test clips (16636 s of test audio). The test rows are also in `results/timing/<system>.csv`, written
+by `make_timing.py`. Training time is ESPnet's elapsed time for stage 11 from `train.log`
+(collected by `run.sh` into `work/full/timing_<system>.txt`). For RNN-T, `train.log` is rewritten on each
+resume, so only the last two training parts were logged; the time before the first interruption was not
+recorded.
+
+Dev and test WER and CER: see `results/results.csv` (computed by `src/evaluate.py`, not by ESPnet).
