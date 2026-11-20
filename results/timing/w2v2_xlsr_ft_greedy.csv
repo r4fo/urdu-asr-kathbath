@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+w2v2_xlsr_ft_greedy,checkpoints/w2v2_xlsr_ft/best,local,1,16,NVIDIA GeForce RTX 4060,16635.62,38.46,0.00231
