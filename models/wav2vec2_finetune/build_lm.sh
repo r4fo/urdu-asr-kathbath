@@ -19,7 +19,7 @@ LMPLZ=$(command -v lmplz || true)
 if [ -z "$LMPLZ" ]; then
   if [ ! -x kenlm/build/bin/lmplz ]; then
     if command -v apt-get >/dev/null && [ "$(id -u)" = 0 ]; then
-      apt-get -qq install -y build-essential cmake libboost-program-options-dev libboost-system-dev \
+      apt-get -qq update && apt-get -qq install -y build-essential cmake libboost-program-options-dev libboost-system-dev \
         libboost-thread-dev libboost-test-dev libeigen3-dev zlib1g-dev libbz2-dev liblzma-dev >/dev/null
     fi
     [ -d kenlm ] || git clone -q https://github.com/kpu/kenlm.git
