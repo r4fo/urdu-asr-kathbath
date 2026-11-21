@@ -42,7 +42,7 @@ def main():
     write("nonsilence_phones.txt", letters)
     write("silence_phones.txt", ["sil", "spn"])
     write("optional_silence.txt", ["sil"])
-    write("extra_questions.txt", [""])
+    open(os.path.join(args.dict_dir, "extra_questions.txt"), "w").close()
     print(f"{len(vocab)} words, {len(letters)} letters")
 
     known = set(vocab)

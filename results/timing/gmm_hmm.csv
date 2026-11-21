@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+gmm_hmm,"Kaldi MFCC + GMM-HMM tri2 (LDA+MLLT), grapheme lexicon, 3-gram LM, LM weight 15, 9 parallel jobs (trained by us, baselines/gmm_hmm/run.sh)",f400766,13,1,"CPU only, 12th Gen Intel(R) Core(TM) i7-1255U, 12 cores",16635.62,2525.35,0.1518
