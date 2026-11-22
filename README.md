@@ -5,7 +5,7 @@ Every number in this README comes from committed code: result tables from `scrip
 
 ## 1. Overview
 
-We build and compare automatic speech recognition (ASR) systems for **Urdu**: 13 systems, all scored on the same
+We build and compare automatic speech recognition (ASR) systems for **Urdu**: 13 configurations of 10 models, all scored on the same
 speaker-disjoint test set with the same text normalization and the same scoring (WER and CER).
 
 - **Course baselines that support Urdu**, trained by us: Kaldi MFCC + GMM-HMM, and ESPnet CTC, hybrid
@@ -17,7 +17,7 @@ speaker-disjoint test set with the same text normalization and the same scoring 
 
 **Main result:** our wav2vec 2.0 XLS-R + KenLM system has the lowest test WER, **18.29%** (95% CI 17.75 to 18.86),
 ahead of our fine-tuned Whisper-small (19.74%) and Whisper-large-v3 zero-shot (21.64%), and it has the lowest
-measured RTF of the four best systems (0.0043, about 13 times lower than Whisper-small with beam 5; see 9.1 on hardware).
+measured RTF of the four best configurations (0.0043; see 9.1 on hardware).
 
 ## 2. Team
 
@@ -78,8 +78,9 @@ flagged or removed utterance is logged with its reason in `data/clean/cleaning_l
 | Odd audio found by profiling | `scripts/profile_data.py`: speech activity and level; 60 candidates in `data/clean/profile_candidates.csv`, the 10 most extreme listened to (`data/clean/manual_review.csv`) | **1 removed** (`844424930857826-622-m`), 9 kept |
 | Wrong transcript | `scripts/find_label_errors.py`: Whisper-small zero-shot vs the transcript; the 30 biggest mismatches in `data/clean/label_check_candidates.csv` reviewed | 0 changed |
 
-Result: 16,856 → **16,855** utterances. Kathbath is human-verified, so the automatic checks found almost
-nothing; we report that instead of inventing problems.
+Result: 16,856 → **16,855** utterances. Kathbath was human-verified by its creators, so the automatic checks found
+almost nothing; we report that instead of inventing problems. We did not listen to or re-check every transcript
+ourselves: only the clips and transcripts flagged above were reviewed.
 
 ## 5. Splits
 
@@ -171,7 +172,7 @@ Models on the course list that do not support Urdu (not run):
 | `nvidia/canary-1b-v2` | 25 European languages only | https://huggingface.co/nvidia/canary-1b-v2 |
 | `nvidia/parakeet-tdt-0.6b-v3` | 25 European languages only | https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3 |
 | `Qwen/Qwen3-ASR-1.7B`, `Qwen/Qwen3-ASR-0.6B` | Urdu not in the supported language list | https://huggingface.co/Qwen/Qwen3-ASR-1.7B |
-| HuBERT + CTC (`facebook/hubert-large-ls960-ft` and the other `facebook/hubert-*` checkpoints) | pretrained on English audio only (LibriLight), CTC heads fine-tuned on English; no Urdu HuBERT checkpoint exists, so the vanilla model cannot output Urdu | https://huggingface.co/facebook/hubert-large-ls960-ft |
+| HuBERT + CTC (`facebook/hubert-large-ls960-ft` and the other `facebook/hubert-*` checkpoints) | no suitable Urdu ASR checkpoint found: the official checkpoints are pretrained on English audio (LibriLight) with English CTC heads, so the vanilla model cannot output Urdu | https://huggingface.co/facebook/hubert-large-ls960-ft |
 
 ## 8. Our contribution
 
@@ -232,8 +233,8 @@ What the table says:
   leakage: the LM uses train text only, and without the one test sentence that also appears in train the WER is
   18.30%.
 - **The most accurate system is also cheap.** wav2vec 2.0 + KenLM decodes at RTF 0.0043 on a T4, Whisper-small
-  beam 5 at 0.0542 on an RTX 4060: about 13 times lower. The GPUs differ, but the T4 is the slower one (the same
-  greedy wav2vec 2.0 model: RTF 0.0030 on the T4, 0.0023 on the RTX 4060), so the gap is not an effect of better hardware.
+  beam 5 at 0.0542 on an RTX 4060: an observed ratio of about 13. The two were measured on different hardware with
+  different decoding methods (LM beam search runs partly on the CPU), so this is not a controlled speed comparison.
 - **Pretraining matters at this data size.** The ESPnet models trained from scratch reach 34 to 45%; every
   pretrained model fine-tuned on our data is under 24%.
 - **Published Urdu checkpoints transfer poorly** to Kathbath (39.01% and 52.34% greedy). They were fine-tuned on a
