@@ -224,6 +224,21 @@ The same greedy wav2vec2 model run again on Colab (Tesla T4), only to time greed
 The greedy wav2vec 2.0 model was also run on Colab (Tesla T4) only to time greedy and LM decoding on the same GPU:
 WER 23.28% (the same model on the RTX 4060 gives 23.28% too), RTF 0.0030 against 0.0043 with the LM.
 
+Paired bootstrap on the key comparisons (`scripts/paired_bootstrap.py`, `results/paired_bootstrap.csv`): both
+systems are scored on the same 1,000 resamples of the test utterances (seed 42). An interval that excludes 0 means
+the difference is not an accident of which utterances are in the test set.
+
+| Comparison (A vs B) | WER difference A − B | 95% CI |
+| --- | --- | --- |
+| fine-tuning Whisper-small (`whisper_small_ft_beam5` vs `whisper_small_zeroshot`) | -22.92 points | [-24.70, -21.30] |
+| fine-tuned small vs zero-shot large-v3 (`whisper_small_ft_beam5` vs `whisper_large_v3_zeroshot`) | -1.90 points | [-2.37, -1.42] |
+| adding the KenLM (`w2v2_xlsr_ft_kenlm` vs `w2v2_xlsr_ft_greedy`) | -4.99 points | [-5.29, -4.66] |
+| best wav2vec2 vs best Whisper (`w2v2_xlsr_ft_kenlm` vs `whisper_small_ft_beam5`) | -1.45 points | [-1.88, -1.00] |
+| beam 5 vs beam 1 (`whisper_small_ft_beam5` vs `whisper_small_ft_beam1`) | -0.65 points | [-0.80, -0.50] |
+
+All five differences are significant in this sense, including the smaller ones (best wav2vec 2.0 vs best Whisper,
+fine-tuned small vs zero-shot large-v3).
+
 What the table says:
 
 - **Fine-tuning works.** Whisper-small goes from 42.66% zero-shot to 19.74% after fine-tuning on 17.6 hours, and
@@ -346,6 +361,7 @@ python models/wav2vec2_finetune/transcribe.py --model checkpoints/w2v2_xlsr_ft/b
 python src/evaluate.py --split data/splits/test.csv --pred results/predictions/<system>.csv
 python scripts/make_tables.py
 python scripts/error_analysis.py
+python scripts/paired_bootstrap.py
 pytest tests/
 ```
 
@@ -358,7 +374,7 @@ pytest tests/
 | `requirements.txt` | Pinned package versions (Python 3.11) |
 | `.gitignore` | Files git ignores (caches, virtual environments, checkpoints) |
 | `contributions/` | One file per member: `<NAME>_<STUDENT_ID>_<GITHUB_USERNAME>.md` |
-| `docs/qa.md` | Likely questions about the project, with short answers (presentation preparation) |
+| `docs/q&a.md` | Likely questions about the project, with short answers (presentation preparation) |
 | `data/raw/` | Kathbath Urdu audio (16-bit FLAC, by speaker) and `metadata.csv`, as downloaded |
 | `data/clean/` | `metadata.csv` after cleaning, `cleaning_log.csv`, `cleaning_summary.csv`, `manual_review.csv` (listening notes), `profile*.csv` (audio profiling), `label_check*.csv` (Whisper label check) |
 | `data/splits/` | `train.csv`, `dev.csv`, `test.csv`, `split_stats.csv`, `test_overlap.csv` |
@@ -370,6 +386,7 @@ pytest tests/
 | `scripts/make_kaldi_dirs.py` | Kaldi data folders for the GMM-HMM baseline |
 | `scripts/make_tables.py` | Builds `results/tables.md`, the source of section 9's tables |
 | `scripts/error_analysis.py` | Builds `results/error_analysis/` (section 9.3) |
+| `scripts/paired_bootstrap.py` | Paired bootstrap for the key comparisons (section 9.1) |
 | `src/normalize.py`, `src/urdu_numbers.py` | The shared normalization; digits to Urdu words |
 | `src/evaluate.py` | WER, CER and bootstrap CI for every system; appends to `results/results.csv` |
 | `baselines/gmm_hmm/` | Kaldi MFCC + GMM-HMM baseline (own README) |
@@ -384,4 +401,5 @@ pytest tests/
 | `results/tables.md` | Generated result tables |
 | `results/lm_tuning_dev.csv` | The dev grid for the KenLM weights |
 | `results/error_analysis/` | Generated error analysis |
+| `results/paired_bootstrap.csv` | Paired bootstrap results |
 | `tests/` | Tests for cleaning, splitting, normalization, numbers, evaluation and the baselines' helpers |

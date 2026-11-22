@@ -1,0 +1,6 @@
+system_a,system_b,comparison,wer_diff_points,ci_low,ci_high,significant
+whisper_small_ft_beam5,whisper_small_zeroshot,fine-tuning Whisper-small,-22.92,-24.7,-21.3,True
+whisper_small_ft_beam5,whisper_large_v3_zeroshot,fine-tuned small vs zero-shot large-v3,-1.9,-2.37,-1.42,True
+w2v2_xlsr_ft_kenlm,w2v2_xlsr_ft_greedy,adding the KenLM,-4.99,-5.29,-4.66,True
+w2v2_xlsr_ft_kenlm,whisper_small_ft_beam5,best wav2vec2 vs best Whisper,-1.45,-1.88,-1.0,True
+whisper_small_ft_beam5,whisper_small_ft_beam1,beam 5 vs beam 1,-0.65,-0.8,-0.5,True
