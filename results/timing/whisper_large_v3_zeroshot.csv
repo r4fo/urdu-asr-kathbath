@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+whisper_large_v3_zeroshot,openai/whisper-large-v3,06f233fe06e710322aca913c1bc4249a0d71fce1,1,8,NVIDIA GeForce RTX 4060,16635.62,669.8,0.04026

@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+kingabzpro_w2v2_urdu,kingabzpro/wav2vec2-urdu,627818e6c8218012d468cdc82e7f9b08c6f8ac13,1,16,NVIDIA GeForce RTX 4060,16635.62,13.44,0.00081
