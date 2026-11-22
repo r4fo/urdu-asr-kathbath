@@ -21,6 +21,8 @@ Usage (repo root):
       --manifest data/splits/dev.csv --out results/predictions/w2v2_ft_dev.csv --system w2v2_ft_dev
   # with the LM:
   ... --lm lm/train_3gram.arpa --alpha 0.5 --beta 1.0 --beam-width 50
+  # a published checkpoint with the LM it ships with, its own alpha/beta (vanilla):
+  ... --model anuragshas/wav2vec2-xls-r-300m-ur-cv9-with-lm --model-lm --beam-width 100
 """
 
 import argparse
@@ -72,7 +74,11 @@ def main():
     p.add_argument("--alpha", type=float, default=0.5, help="LM weight (tune on dev)")
     p.add_argument("--beta", type=float, default=1.0, help="word insertion bonus (tune on dev)")
     p.add_argument("--beam-width", type=int, default=50)
+    p.add_argument("--model-lm", action="store_true",
+                   help="decode with the LM shipped inside the Hub checkpoint, with its own alpha/beta")
     args = p.parse_args()
+    if args.model_lm and args.lm:
+        p.error("use either --lm or --model-lm, not both")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     hardware = torch.cuda.get_device_name(0) if device == "cuda" else platform.processor()
@@ -88,6 +94,9 @@ def main():
         model = model.half()
     revision = args.revision or getattr(model.config, "_commit_hash", None) or "local"
     decoder = make_lm_decoder(processor, args.lm, args.alpha, args.beta) if args.lm else None
+    if args.model_lm:
+        from transformers import Wav2Vec2ProcessorWithLM
+        decoder = Wav2Vec2ProcessorWithLM.from_pretrained(args.model, revision=args.revision).decoder
 
     rows = list(df.itertuples(index=False))
     batches = [rows[i:i + args.batch_size] for i in range(0, len(rows), args.batch_size)]
@@ -140,7 +149,7 @@ def main():
                     "hardware": hardware, "audio_seconds": round(audio_sec, 2),
                     "decode_seconds": round(decode_sec, 2), "rtf": round(decode_sec / audio_sec, 5)})
     print(f"Wrote {out} ({len(hyps)} utterances). RTF {decode_sec / audio_sec:.4f} on {hardware}, "
-          f"{'LM ' + args.lm if decoder else 'greedy'}, revision {revision}")
+          f"{'LM ' + (args.lm or 'shipped with the model') if decoder else 'greedy'}, revision {revision}")
 
 
 if __name__ == "__main__":
