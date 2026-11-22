@@ -16,8 +16,8 @@ speaker-disjoint test set with the same text normalization and the same scoring 
   3-gram built from training text only, with its weights chosen on dev.
 
 **Main result:** our wav2vec 2.0 XLS-R + KenLM system has the lowest test WER, **18.29%** (95% CI 17.75 to 18.86),
-ahead of our fine-tuned Whisper-small (19.74%) and Whisper-large-v3 zero-shot (21.64%), and it decodes about
-13 times faster than Whisper-small with beam 5.
+ahead of our fine-tuned Whisper-small (19.74%) and Whisper-large-v3 zero-shot (21.64%), and it has the lowest
+measured RTF of the four best systems (0.0043, about 13 times lower than Whisper-small with beam 5; see 9.1 on hardware).
 
 ## 2. Team
 
@@ -39,7 +39,7 @@ Each member's contribution is described in `contributions/`.
   CC BY 4.0. We follow the stricter one (CC BY 4.0) and credit AI4Bharat. The read sentences
   come from IndicCorp; AI4Bharat states that it does not own that raw text.
 - **Why Urdu:** no other group in the course chose it, open human-verified Urdu speech data is scarce, and among
-  the course's pretrained models only Whisper supports it, so most of the work is in fine-tuning and in
+  the course's pretrained models only Whisper supports it (the Urdu wav2vec 2.0 models we ran are community checkpoints), so most of the work is in fine-tuning and in
   baselines trained from scratch. The Perso-Arabic script also has letters that sound the same (section 9.3).
 - **What we use:** a 25-hour subset of the Hugging Face `train` and `valid` splits (the Hugging Face version has no
   Test-Unknown split). `scripts/download_kathbath_urdu.py` caps the hours per speaker (found by binary search)
@@ -232,7 +232,8 @@ What the table says:
   leakage: the LM uses train text only, and without the one test sentence that also appears in train the WER is
   18.30%.
 - **The most accurate system is also cheap.** wav2vec 2.0 + KenLM decodes at RTF 0.0043 on a T4, Whisper-small
-  beam 5 at 0.0542 on an RTX 4060 (the faster GPU).
+  beam 5 at 0.0542 on an RTX 4060: about 13 times lower. The GPUs differ, but the T4 is the slower one (the same
+  greedy wav2vec 2.0 model: RTF 0.0030 on the T4, 0.0023 on the RTX 4060), so the gap is not an effect of better hardware.
 - **Pretraining matters at this data size.** The ESPnet models trained from scratch reach 34 to 45%; every
   pretrained model fine-tuned on our data is under 24%.
 - **Published Urdu checkpoints transfer poorly** to Kathbath (39.01% and 52.34% greedy). They were fine-tuned on a
