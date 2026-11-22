@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+w2v2_xlsr_ft_greedy_colab,r4fo/wav2vec2-xls-r-300m-urdu-kathbath,da12c3a661de35b65275157b978ead8405640da7,1,16,Tesla T4,16635.62,49.93,0.003
