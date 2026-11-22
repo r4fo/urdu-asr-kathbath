@@ -1,0 +1,6 @@
+system,utterances,loops,latin_outputs,substitution_rate,deletion_rate,insertion_rate
+whisper_small_zeroshot,3031,13,29,0.3302,0.0313,0.0651
+whisper_large_v3_zeroshot,3031,1,2,0.1738,0.0146,0.0281
+whisper_small_ft_beam5,3031,0,0,0.1573,0.0176,0.0225
+w2v2_xlsr_ft_greedy,3031,0,0,0.1856,0.0268,0.0204
+w2v2_xlsr_ft_kenlm,3031,0,0,0.1392,0.022,0.0218
