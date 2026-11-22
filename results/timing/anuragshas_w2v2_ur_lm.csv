@@ -1,0 +1,2 @@
+system,model,revision,num_beams,batch_size,hardware,audio_seconds,decode_seconds,rtf
+anuragshas_w2v2_ur_lm,anuragshas/wav2vec2-xls-r-300m-ur-cv9-with-lm,0fee38baf834b841d27923ac9c09676652963237,100,16,Tesla T4,16635.62,123.71,0.00744
