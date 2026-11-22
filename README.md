@@ -178,10 +178,10 @@ Models on the course list that do not support Urdu (not run):
 
 All three systems are tuned on dev only; test was decoded once per system, after it was frozen.
 
-**Whisper-small fine-tuned** (`models/whisper_finetune/`). `train.py` with its defaults: `openai/whisper-small`
-(revision above), learning rate 1e-5, 200 warm-up steps, batch 8 × gradient accumulation 2, fp16, gradient
+**Whisper-small fine-tuned** (`models/whisper_finetune/`). `train.py --epochs 4`, other settings the defaults:
+`openai/whisper-small` (revision above), learning rate 1e-5, 200 warm-up steps, batch 8 × gradient accumulation 2, fp16, gradient
 checkpointing, AdamW, seed 42, evaluated every 250 steps on the first 300 dev clips; the checkpoint with the lowest
-dev WER is kept. Decoding: beam 5 is the main system (dev WER 17.36% against 17.94% for beam 1); beam 1 is reported
+dev WER is kept (step 2,250 of 2,968, about epoch 3; the training state is saved with the checkpoint). Decoding: beam 5 is the main system (dev WER 17.36% against 17.94% for beam 1); beam 1 is reported
 as the faster option. Frozen on 19 November 2026.
 Weights: [`r4fo/whisper-small-urdu-kathbath`](https://huggingface.co/r4fo/whisper-small-urdu-kathbath),
 revision `b060bc34ee1c739c3ec96049c5f26f245e0edf68`.
@@ -352,7 +352,7 @@ python scripts/download_kathbath_urdu.py --target-hours 25 --seed 42   # data/ra
 python scripts/clean.py                                                # data/clean/
 python scripts/split.py                                                # data/splits/
 # our systems (GPU)
-python models/whisper_finetune/train.py
+python models/whisper_finetune/train.py --epochs 4 --output-dir checkpoints/whisper_small_ft
 python models/whisper_finetune/transcribe.py --model checkpoints/whisper_small_ft/best --manifest data/splits/test.csv --out results/predictions/whisper_small_ft_beam5.csv --system whisper_small_ft_beam5 --num-beams 5
 python models/wav2vec2_finetune/train.py --epochs 15
 python models/wav2vec2_finetune/transcribe.py --model checkpoints/w2v2_xlsr_ft/best --manifest data/splits/test.csv --out results/predictions/w2v2_xlsr_ft_greedy.csv --system w2v2_xlsr_ft_greedy
