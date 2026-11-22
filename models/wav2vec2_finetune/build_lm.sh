@@ -5,6 +5,7 @@
 # Run on Linux, WSL or Colab, from the repo root:   bash models/wav2vec2_finetune/build_lm.sh
 # It builds KenLM's lmplz once if it is not installed (about 5 minutes on Colab).
 set -euo pipefail
+export CMAKE_POLICY_VERSION_MINIMUM=3.5  # KenLM asks for CMake < 3.5, which CMake 4 refuses otherwise
 mkdir -p lm
 
 python - <<'PY'
