@@ -327,6 +327,8 @@ Most frequent one-letter mistakes of fine-tuned Whisper (words that differ from 
 ## 10. How to reproduce
 
 Python 3.11, `pip install -r requirements.txt`. Seed 42 everywhere (subset selection, split, training, bootstrap).
+LM decoding also needs `pyctcdecode==0.5.0` and `kenlm==0.2.0`, which build on Linux or Colab, not Windows; the
+Colab notebooks install them. Kaldi and ESPnet are set up as described in their baseline folders.
 
 ```
 python scripts/download_kathbath_urdu.py --target-hours 25 --seed 42   # data/raw/ (already committed)
